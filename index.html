@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>ポイントカード</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script src="liff.js"></script>
+    <script src="index.js"></script>
+
+
+
+    <style>
+        #loading {
+            display: block;
+            text-align: center;
+            padding: 30px;
+        }
+        #content {
+            display: none;
+        }
+
+        .image-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img {
+            width: 80%;
+            height: auto;
+        }
+
+        .overlay-text {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: black;
+            font-weight: bold;
+        }
+
+
+    　　.rank_dat {
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* センタリングを追加 */
+        }
+      .rank_dat span {
+            display: inline-block;
+            line-height: 1;
+        }
+
+div{
+　
+　　font-size:0;
+　　line-height:0;
+}
+
+        
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="./public/card.css">
+</head>
+<body>
+    <div id="loading">
+        <!-- ローディング画像をここに追加 -->
+        <img src="loading.gif" alt="Loading...">
+    </div>
+    
+    <div id="content">
+        <div class="card1">
+            <div class="title1">
+                <div id="name" class="content1">
+                    <div id="data-container"></div>
+                </div>
+            </div>
+            <div class="bdy">現在の保有ポイント</div>
+
+<div style="text-align: center;" class="bdy2">
+  <div style="display: inline-block;" class="content2">
+    <span id="point"><div id="data-container2"></div></span><span style="display: inline-block; line-height: 1;" class="bdy3">pt</span>
+</div> </div>
+
+            
+
+
+    <div class="rank_dat">
+        <div style="display: inline-block;" class="content3">
+            <span id="point"><div id="data-container3"></div></span><span style="display: inline-block;">現在のランク</span>
+   </div></div> 
+
+
+
+   
+
+<p class="bottom1">現在のランク<span style="float: right;"><span id="point"><div id="data-container3"></div></span></span>
+
+</p>   
+
+
+            
+        </div>
+    </div>
+    
+
+
+
+
+    
+    <script>
+        // LIFFの初期化
+        liff.init({ liffId: '2001059289-X2m74PYZ' }, () => {
+            if (liff.isLoggedIn()) {
+                // ユーザーがログインしている場合
+                sendIdTokenToGAS();
+            } else {
+                // ログインが必要な場合、ログインページを表示
+                liff.login();
+            }
+        });
+
+        // IDトークンをGASに送信する関数
+        function sendIdTokenToGAS() {
+            const idToken = liff.getIDToken();
+
+            // ローディング画像表示
+            $('#loading').show();
+
+            // IDトークンをGASに送信
+            $.ajax({
+                url: 'https://script.google.com/macros/s/AKfycbyUKKeHDJHr7UpVMMynHyyFd0kJCc4W8oDgAvSLNHULheyqVk1xIhlykX5AfHyqct2xFA/exec',
+                type: 'POST',
+                data: { idToken: idToken },
+                success: function (response) {
+                    // 成功時の処理
+                    console.log(response);
+                    displayMessage(response); // レスポンスメッセージを表示
+                    displayData(response);
+                },
+                error: function (error) {
+                    // エラー時の処理
+                    console.error(error);
+                    alert('Failed to send ID Token to GAS.');
+                },
+                complete: function () {
+                    // 通信完了時の処理（ローディング画像を非表示にし、コンテンツを表示）
+                    $('#loading').hide();
+                    $('#content').show();
+                }
+            });
+        }
+
+        // メッセージを表示する関数
+        function displayMessage(message) {
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+            document.body.appendChild(messageElement);
+        }
+
+        // 取得したデータをHTMLに表示する関数
+        function displayData(data) {
+            const jsonData = JSON.parse(data);
+
+
+            const container = document.getElementById("data-container");
+            const container2 = document.getElementById("data-container2");
+ const container3 = document.getElementById("data-container3");
+
+            
+            const paragraph = document.createElement("p");
+            paragraph.textContent = `${jsonData.name} 様`;
+            container.appendChild(paragraph);
+
+            const paragraph2 = document.createElement("p");
+            paragraph2.textContent = `${jsonData.score} `;　// pt
+            container2.appendChild(paragraph2);
+
+            const paragraph3 = document.createElement("p");
+            paragraph3.textContent = `${jsonData.rank} `;　//rank
+            container3.appendChild(paragraph3);
+            
+        }
+    </script>
+</body>
+</html>
